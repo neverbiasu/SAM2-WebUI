@@ -88,19 +88,24 @@ def segment_anything(mode, input_image, input_video, model_name):
 def webui(port):
     with gr.Blocks() as Interface:
         with gr.Row():
-            mode_input = gr.Dropdown(
-                choices=["SAM2AutomaticMaskGenerator", "SAM2ImagePredictor", "SAM2VideoPredictor"],
-                label="Mode"
-            )
-            image_input = gr.ImageEditor(label="Input Image")
-            video_input = gr.Video(label="Input Video", type="mp4", max_duration=30)
-            model_input = gr.Dropdown(
-                choices=["sam2_hiera_large", "sam2_hiera_small", "sam2_hiera_tiny", "sam2_hiera_base_plus"],
-                label="Model"
-            )
-            image_outpput = gr.Image(label="Output Image")
-            video_output = gr.Video(label="Output Video", type="mp4")
-            process_masks_button = gr.Button(label="Processed Masks")
+            with gr.Column():
+                with gr.Column():
+                    mode_input = gr.Dropdown(
+                        choices=["SAM2AutomaticMaskGenerator", "SAM2ImagePredictor", "SAM2VideoPredictor"],
+                        label="Mode"
+                    )
+                    image_input = gr.ImageEditor(label="Input Image")
+                    video_input = gr.Video(label="Input Video")
+                
+                    model_input = gr.Dropdown(
+                        choices=["sam2_hiera_large", "sam2_hiera_small", "sam2_hiera_tiny", "sam2_hiera_base_plus"],
+                        label="Model"
+                    )
+            with gr.Column():
+                with gr.Column():
+                    image_outpput = gr.Image(label="Output Image")
+                    video_output = gr.Video(label="Output Video")
+                    process_masks_button = gr.Button("Processed Masks")
 
         if mode_input.value == "SAM2VideoPredictor":
             # Preprocess video to extract the first frame
@@ -122,7 +127,7 @@ def webui(port):
             show_progress=True
         )
 
-    Interface.launch(port=port)
+    Interface.launch(server_port=port)
 
 def main():
     argparse.ArgumentParser()
