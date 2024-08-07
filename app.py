@@ -7,12 +7,10 @@ import matplotlib.pyplot as plt
 import argparse
 
 from PIL import Image
-from segment_anything_2.sam2.sam2_image_predictor import SAM2ImagePredictor
-from segment_anything_2.sam2.sam2_video_predictor import SAM2VideoPredictor
-from segment_anything_2.sam2.build_sam import build_sam2, build_sam2_video_predictor
-from segment_anything_2.sam2.automatic_mask_generator import SAM2AutomaticMaskGenerator
-
-from segment_anything_2.tools import load_ann_png, save_ann_png, get_per_obj_mask, put_per_obj_mask, load_masks_from_dir, save_masks_to_dir, vos_inference
+from sam2.sam2_image_predictor import SAM2ImagePredictor
+from sam2.sam2_video_predictor import SAM2VideoPredictor
+from sam2.build_sam import build_sam2, build_sam2_video_predictor
+from sam2.automatic_mask_generator import SAM2AutomaticMaskGenerator
 
 def show_anns(anns, borders=True):
     if len(anns) == 0:
