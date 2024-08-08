@@ -35,29 +35,29 @@ def show_anns(anns, borders=True):
 def load_model(model_name):
     if model_name == "sam2_hiera_large":
         model = build_sam2(
-            config_path="segment-anything-2/sam2_configs/sam2_hiera_l.yaml",
-            model_path="segment-anything-2/checkpoints/sam2_hiera_large.pt",
+            config_file="segment-anything-2/sam2_configs/sam2_hiera_l.yaml",
+            ckpt_path="segment-anything-2/checkpoints/sam2_hiera_large.pt",
             device ='cuda', 
             apply_postprocessing=False
         )
     elif model_name == "sam2_hiera_small":
         model = build_sam2(
-            config_path="segment-anything-2/sam2_configs/sam2_hiera_s.yaml",
-            model_path="segment-anything-2/checkpoints/sam2_hiera_small.pt",
+            config_file="segment-anything-2/sam2_configs/sam2_hiera_s.yaml",
+            ckpt_path="segment-anything-2/checkpoints/sam2_hiera_small.pt",
             device ='cuda', 
             apply_postprocessing=False
         )
     elif model_name == "sam2_hiera_tiny":
         model = build_sam2(
-            config_path="segment-anything-2/sam2_configs/sam2_hiera_t.yaml",
-            model_path="segment-anything-2/checkpoints/sam2_hiera_tiny.pt",
+            config_file="segment-anything-2/sam2_configs/sam2_hiera_t.yaml",
+            ckpt_path="segment-anything-2/checkpoints/sam2_hiera_tiny.pt",
             device ='cuda', 
             apply_postprocessing=False
         )
     elif model_name == "sam2_hiera_base_plus":
         model = build_sam2(
-            config_path="segment-anything-2/sam2_configs/sam2_hiera_b+.yaml",
-            model_path="segment-anything-2/checkpoints/sam2_hiera_base_plus.pt",
+            config_file="segment-anything-2/sam2_configs/sam2_hiera_b+.yaml",
+            ckpt_path="segment-anything-2/checkpoints/sam2_hiera_base_plus.pt",
             device ='cuda', 
             apply_postprocessing=False
         )
