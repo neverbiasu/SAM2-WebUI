@@ -12,6 +12,13 @@ from sam2.sam2_video_predictor import SAM2VideoPredictor
 from sam2.build_sam import build_sam2, build_sam2_video_predictor
 from sam2.automatic_mask_generator import SAM2AutomaticMaskGenerator
 
+torch.autocast(device_type="cuda", dtype=torch.bfloat16).__enter__()
+
+if torch.cuda.get_device_properties(0).major >= 8:
+    # turn on tfloat32 for Ampere GPUs (https://pytorch.org/docs/stable/notes/cuda.html#tensorfloat-32-tf32-on-ampere-devices)
+    torch.backends.cuda.matmul.allow_tf32 = True
+    torch.backends.cudnn.allow_tf32 = True
+
 def show_anns(anns, borders=True):
     if len(anns) == 0:
         return None
@@ -30,33 +37,33 @@ def show_anns(anns, borders=True):
             cv2.drawContours(img, contours, -1, (0,0,1,0.4), thickness=1) 
 
     img = (img * 255).astype(np.uint8)
-    return Image.fromarray(img)
+    return img
 
 def load_model(model_name):
     if model_name == "sam2_hiera_large":
         model = build_sam2(
-            config_file="segment-anything-2/sam2_configs/sam2_hiera_l.yaml",
+            config_file="sam2_hiera_l.yaml",
             ckpt_path="segment-anything-2/checkpoints/sam2_hiera_large.pt",
-            device ='cuda', 
+            device ='cuda',
             apply_postprocessing=False
         )
     elif model_name == "sam2_hiera_small":
         model = build_sam2(
-            config_file="segment-anything-2/sam2_configs/sam2_hiera_s.yaml",
+            config_file="sam2_hiera_s.yaml",
             ckpt_path="segment-anything-2/checkpoints/sam2_hiera_small.pt",
             device ='cuda', 
             apply_postprocessing=False
         )
     elif model_name == "sam2_hiera_tiny":
         model = build_sam2(
-            config_file="segment-anything-2/sam2_configs/sam2_hiera_t.yaml",
+            config_file="sam2_hiera_t.yaml",
             ckpt_path="segment-anything-2/checkpoints/sam2_hiera_tiny.pt",
             device ='cuda', 
             apply_postprocessing=False
         )
     elif model_name == "sam2_hiera_base_plus":
         model = build_sam2(
-            config_file="segment-anything-2/sam2_configs/sam2_hiera_b+.yaml",
+            config_file="sam2_hiera_b+.yaml",
             ckpt_path="segment-anything-2/checkpoints/sam2_hiera_base_plus.pt",
             device ='cuda', 
             apply_postprocessing=False
@@ -66,22 +73,29 @@ def load_model(model_name):
     return model
 
 def segment_anything(mode, input_image, input_video, model_name):
+    output_video = None
     if (mode == "SAM2VideoPredictor"):
-        return
+        return None, output_video
     else:
         model = load_model(model_name)
-        image = np.array(input_image.convert("RGB"))
+        image_array = input_image["layers"][0]
+        image_pil = Image.fromarray(image_array.astype('uint8'), 'RGB')
+        image = np.array(image_pil.convert("RGB"))
+        # is_bf16 = image.dtype == torch.bfloat16
+        # print("Is image of dtype bfloat16?", is_bf16)
         if (mode == "SAM2AutomaticMaskGenerator"):
             mask_generator = SAM2AutomaticMaskGenerator(model)
+            print("model load successfully!")
             masks = mask_generator.generate(image)
-            output_image = show_anns(masks)
-            return output_image
+            print("masks[0].keys()", masks[0].keys())
+            output_image = image
+            return output_image, output_video
         else:
             predictor = SAM2ImagePredictor(model)
             predictor.set_image(image)
             masks = mask_generator.generate(image)
             output_image = show_anns(masks)
-            return output_image
+            return output_image, output_video
 
 def webui(port):
     with gr.Blocks() as Interface:
@@ -92,7 +106,7 @@ def webui(port):
                         choices=["SAM2AutomaticMaskGenerator", "SAM2ImagePredictor", "SAM2VideoPredictor"],
                         label="Mode"
                     )
-                    image_input = gr.ImageEditor(label="Input Image")
+                    image_input = gr.ImageEditor(image_mode="RGB", label="Input Image", eraser="False", brush=gr.Brush(colors=["#000000"], color_mode="fixed"))
                     video_input = gr.Video(label="Input Video")
                 
                     model_input = gr.Dropdown(
@@ -137,4 +151,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    
